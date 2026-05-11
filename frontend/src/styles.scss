@@ -1,0 +1,13 @@
+@use 'bootstrap/scss/bootstrap';
+@import url('bootstrap-icons/font/bootstrap-icons.css');
+
+// Custom scrollbar handling
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+}

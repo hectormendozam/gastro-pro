@@ -1,0 +1,96 @@
+<div class="container py-5">
+  <div class="row justify-content-center align-items-center">
+    <!-- Información de Contacto (Lado Izquierdo) -->
+    <div class="col-lg-5 mb-5 mb-lg-0">
+      <h2 class="display-5 fw-bold mb-4">Ponte en contacto</h2>
+      <p class="lead text-muted mb-5">
+        ¿Tienes alguna pregunta sobre nuestro menú o servicios? ¡Estamos aquí para ayudarte!
+        Llena el formulario y te responderemos lo antes posible.
+      </p>
+      
+      <div class="d-flex mb-4">
+        <div class="icon-box bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+          <i class="bi bi-geo-alt-fill fs-4"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Ubicación</h5>
+          <p class="text-muted mb-0">Av. Gastronomía 123, Ciudad de México</p>
+        </div>
+      </div>
+
+      <div class="d-flex mb-4">
+        <div class="icon-box bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+          <i class="bi bi-envelope-fill fs-4"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Email</h5>
+          <p class="text-muted mb-0">contacto@gastropro.com</p>
+        </div>
+      </div>
+
+      <div class="d-flex">
+        <div class="icon-box bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+          <i class="bi bi-telephone-fill fs-4"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Teléfono</h5>
+          <p class="text-muted mb-0">+52 55 1234 5678</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario (Lado Derecho) -->
+    <div class="col-lg-6 offset-lg-1">
+      <div class="card shadow border-0">
+        <div class="card-body p-4 p-md-5">
+          <h3 class="mb-4 fw-bold">Envíanos un mensaje</h3>
+
+          @if (showSuccess()) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <strong>¡Mensaje enviado!</strong> Gracias por contactarnos.
+              <button type="button" class="btn-close" (click)="showSuccess.set(false)" aria-label="Close"></button>
+            </div>
+          }
+
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" novalidate>
+            <div class="mb-3">
+              <label for="name" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-lg" id="name" formControlName="name"
+                     [class.is-invalid]="f['name'].invalid && (f['name'].dirty || f['name'].touched)"
+                     placeholder="Tu nombre">
+              <div class="invalid-feedback">
+                El nombre es obligatorio (mínimo 2 caracteres).
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control form-control-lg" id="email" formControlName="email"
+                     [class.is-invalid]="f['email'].invalid && (f['email'].dirty || f['email'].touched)"
+                     placeholder="tucorreo@ejemplo.com">
+              <div class="invalid-feedback">
+                Por favor ingresa un email válido.
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="message" class="form-label">Mensaje <span class="text-danger">*</span></label>
+              <textarea class="form-control form-control-lg" id="message" rows="4" formControlName="message"
+                        [class.is-invalid]="f['message'].invalid && (f['message'].dirty || f['message'].touched)"
+                        placeholder="¿En qué podemos ayudarte?"></textarea>
+              <div class="invalid-feedback">
+                El mensaje es obligatorio (mínimo 10 caracteres).
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" [disabled]="contactForm.invalid">
+              Enviar Mensaje <i class="bi bi-send-fill ms-2"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

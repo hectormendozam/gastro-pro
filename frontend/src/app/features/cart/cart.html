@@ -1,0 +1,136 @@
+<div class="container py-5">
+  <h2 class="mb-4 display-6 fw-bold">Tu Carrito</h2>
+
+  @if (cartService.items().length === 0) {
+    <div class="alert alert-info text-center py-5" role="alert">
+      <i class="bi bi-cart-x display-1 mb-3"></i>
+      <h3 class="alert-heading">Tu carrito está vacío</h3>
+      <p>¡Explora nuestro delicioso menú y agrega algo!</p>
+      <a routerLink="/menu" class="btn btn-primary mt-3">Ir al Menú</a>
+    </div>
+  } @else {
+    <div class="row">
+      <!-- Lista de Items -->
+      <div class="col-lg-8">
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 50%">Platillo</th>
+                <th scope="col" style="width: 15%">Precio</th>
+                <th scope="col" style="width: 20%">Cantidad</th>
+                <th scope="col" style="width: 15%">Subtotal</th>
+                <th scope="col" style="width: 5%"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of cartService.items(); track item.dish.id) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img [src]="item.dish.image" [alt]="item.dish.name"
+                           class="rounded me-3 d-none d-sm-block" style="width: 50px; height: 50px; object-fit: cover;">
+                      <div>
+                        <div class="fw-bold">{{ item.dish.name }}</div>
+                        <div class="text-muted small">{{ item.dish.category }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ item.dish.price | currency }}</td>
+                  <td>
+                    <div class="input-group input-group-sm quantity-control">
+                      <button class="btn btn-outline-secondary" type="button" 
+                              (click)="updateQuantity(item.dish.id, item.quantity - 1)" 
+                              [disabled]="item.quantity <= 1">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="text" class="form-control text-center" [value]="item.quantity" readonly>
+                      <button class="btn btn-outline-secondary" type="button" 
+                              (click)="updateQuantity(item.dish.id, item.quantity + 1)">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td class="fw-bold">{{ item.subtotal | currency }}</td>
+                  <td>
+                    <button class="btn btn-link text-danger p-0" 
+                            (click)="cartService.removeFromCart(item.dish.id)" title="Eliminar">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Resumen de Orden -->
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <h4 class="card-title fw-bold mb-4">Resumen</h4>
+            
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Subtotal</span>
+              <span class="fw-bold">{{ cartService.subtotal() | currency }}</span>
+            </div>
+
+            <!-- Cupón -->
+            <div class="mb-3">
+              <label for="coupon" class="form-label small text-muted">Cupón de descuento</label>
+              <div class="input-group mb-2">
+                <input type="text" class="form-control" id="coupon" placeholder="Código" 
+                       [ngModel]="couponInput()" (ngModelChange)="couponInput.set($event)"
+                       [disabled]="!!cartService.getAppliedCoupon()()">
+                <button class="btn btn-outline-secondary" type="button" 
+                        (click)="applyCoupon()"
+                        [disabled]="!!cartService.getAppliedCoupon()() || !couponInput()">Aplicar</button>
+              </div>
+              @if (cartService.getAppliedCoupon()()) {
+                <div class="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 small mb-0">
+                  <span>Cupón <strong>{{ cartService.getAppliedCoupon()() }}</strong> aplicado</span>
+                  <button type="button" class="btn-close btn-sm" aria-label="Close" (click)="removeCoupon()"></button>
+                </div>
+              }
+            </div>
+
+            @if (cartService.discount() > 0) {
+              <div class="d-flex justify-content-between mb-2 text-success">
+                <span>Descuento</span>
+                <span>-{{ cartService.discount() | currency }}</span>
+              </div>
+            }
+
+            <hr>
+
+            <div class="d-flex justify-content-between mb-4">
+              <span class="h5">Total</span>
+              <span class="h5 fw-bold text-primary">{{ cartService.total() | currency }}</span>
+            </div>
+
+            <!-- Hora de Recogida -->
+            <div class="mb-4">
+              <label for="pickupTime" class="form-label fw-bold">Hora de recogida <span class="text-danger">*</span></label>
+              <input type="time" class="form-control" id="pickupTime" 
+                     [ngModel]="pickupTime()" (ngModelChange)="pickupTime.set($event)"
+                     (blur)="validatePickupTime()"
+                     [class.is-invalid]="pickupTimeError()">
+              <div class="form-text text-muted">Horario disponible: 12:00 PM - 10:00 PM</div>
+              @if (pickupTimeError()) {
+                <div class="invalid-feedback d-block">
+                  {{ pickupTimeError() }}
+                </div>
+              }
+            </div>
+
+            <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" (click)="confirmOrder()">
+              <i class="bi bi-check-circle-fill me-2"></i> Confirmar Pedido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

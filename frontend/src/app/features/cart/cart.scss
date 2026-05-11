@@ -1,0 +1,17 @@
+.quantity-control {
+  width: 120px;
+  
+  input {
+    min-width: 40px;
+  }
+}
+
+.table > :not(caption) > * > * {
+  padding: 1rem 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .quantity-control {
+    width: 100px;
+  }
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GastroPro</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    (function() {
+      const getPreferredTheme = () => {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      const setTheme = (theme) => {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+      }
+
+      setTheme(getPreferredTheme());
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        setTheme(getPreferredTheme());
+      });
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

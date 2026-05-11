@@ -1,0 +1,23 @@
+.navbar-brand {
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.nav-link {
+  font-weight: 500;
+  margin-right: 10px;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #ffc107 !important; // Bootstrap warning color
+  }
+
+  &.active {
+    color: #ffc107 !important;
+    font-weight: bold;
+  }
+}
+
+.badge {
+  font-size: 0.75em;
+}

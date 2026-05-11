@@ -1,0 +1,70 @@
+<div class="container py-5">
+  <!-- Header: Title and Filters -->
+  <div class="text-center mb-5">
+    <h1 class="display-4 fw-bold mb-3">Menú</h1>
+    <p class="lead text-muted mb-4">Descubre los auténticos sabores que tenemos para ti.</p>
+    
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+      <button 
+        class="btn rounded-pill px-4 py-2" 
+        [class.btn-primary]="selectedCategory() === 'Todos'"
+        [class.btn-outline-primary]="selectedCategory() !== 'Todos'"
+        (click)="setCategory('Todos')">
+        Todos
+      </button>
+      
+      @for (cat of categories; track cat) {
+        <button 
+          class="btn rounded-pill px-4 py-2" 
+          [class.btn-primary]="selectedCategory() === cat"
+          [class.btn-outline-primary]="selectedCategory() !== cat"
+          (click)="setCategory(cat)">
+          {{ cat }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Dishes Grid -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+    @for (dish of filteredDishes(); track dish.id) {
+      <div class="col">
+        <div class="card h-100 shadow-sm border-0 dish-card">
+          <div class="card-img-wrapper position-relative overflow-hidden bg-light" style="height: 200px;">
+            <img [src]="dish.image" class="card-img-top w-100 h-100 object-fit-cover" [alt]="dish.name" 
+                 onerror="this.src='https://placehold.co/600x400?text=Platillo'">
+            <div class="category-badge position-absolute top-0 end-0 m-2 badge bg-warning text-dark">
+              {{ dish.category }}
+            </div>
+          </div>
+          
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold text-truncate" [title]="dish.name">{{ dish.name }}</h5>
+            <p class="card-text text-muted small flex-grow-1 overflow-hidden" style="max-height: 3.6em; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical;">
+              {{ dish.description }}
+            </p>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+              <span class="fs-5 fw-bold text-primary">{{ dish.price | currency }}</span>
+              <button 
+                class="btn btn-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm btn-add" 
+                style="width: 40px; height: 40px;"
+                (click)="addToCart(dish)" 
+                title="Agregar al carrito">
+                <i class="bi bi-plus-lg fs-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-12 text-center py-5">
+        <div class="text-muted">
+          <i class="bi bi-search fs-1 mb-3 d-block"></i>
+          <p class="fs-4">No hay platillos disponibles en esta categoría.</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+

@@ -1,0 +1,138 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+      <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header bg-primary text-white p-4">
+          <h2 class="h3 mb-0 text-center fw-bold"><i class="bi bi-calendar-check me-2"></i>Hacer una Reserva</h2>
+        </div>
+        <div class="card-body p-4 p-md-5">
+
+          @if (showSuccess()) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <strong>¡Reserva confirmada!</strong> Tus datos han sido guardados correctamente.
+              <button type="button" class="btn-close" (click)="showSuccess.set(false)" aria-label="Close"></button>
+            </div>
+          }
+
+          <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()" novalidate>
+            <!-- Nombre Completo -->
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="fullName" formControlName="fullName"
+                       [class.is-invalid]="f['fullName'].invalid && (f['fullName'].dirty || f['fullName'].touched)"
+                       placeholder="Ej. Juan Pérez">
+                <div class="invalid-feedback">
+                  @if (f['fullName'].errors?.['required']) { El nombre es obligatorio. }
+                  @else if (f['fullName'].errors?.['minlength']) { Debe tener al menos 3 caracteres. }
+                </div>
+              </div>
+            </div>
+
+            <!-- Email y Teléfono -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input type="email" class="form-control" id="email" formControlName="email"
+                         [class.is-invalid]="f['email'].invalid && (f['email'].dirty || f['email'].touched)"
+                         placeholder="nombre@ejemplo.com">
+                  <div class="invalid-feedback">
+                    @if (f['email'].errors?.['required']) { El email es obligatorio. }
+                    @else if (f['email'].errors?.['email']) { Ingresa un email válido. }
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="phone" class="form-label">Teléfono <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" class="form-control" id="phone" formControlName="phone"
+                         [class.is-invalid]="f['phone'].invalid && (f['phone'].dirty || f['phone'].touched)"
+                         placeholder="Solo números (10 dígitos)" maxlength="10">
+                  <div class="invalid-feedback">
+                    @if (f['phone'].errors?.['required']) { El teléfono es obligatorio. }
+                    @else if (f['phone'].errors?.['pattern']) { Solo se permiten números. }
+                    @else if (f['phone'].errors?.['maxlength'] || f['phone'].errors?.['minlength']) { Debe tener exactamente 10 dígitos. }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personas y Zona -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="peopleCount" class="form-label">Número de Personas <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-people"></i></span>
+                  <input type="number" class="form-control" id="peopleCount" formControlName="peopleCount" min="1" max="6"
+                         [class.is-invalid]="f['peopleCount'].invalid && (f['peopleCount'].dirty || f['peopleCount'].touched)">
+                  <div class="invalid-feedback">
+                    @if (f['peopleCount'].errors?.['required']) { Este campo es obligatorio. }
+                    @else if (f['peopleCount'].errors?.['min']) { Mínimo 1 persona. }
+                    @else if (f['peopleCount'].errors?.['max']) { Máximo 6 personas por mesa. }
+                  </div>
+                </div>
+                <div class="form-text text-muted">Máximo 6 personas.</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="zone" class="form-label">Zona Preferida <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-shop"></i></span>
+                  <select class="form-select" id="zone" formControlName="zone"
+                          [class.is-invalid]="f['zone'].invalid && (f['zone'].dirty || f['zone'].touched)">
+                    @for (zone of zones; track zone) {
+                      <option [value]="zone">{{ zone | titlecase }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fecha y Hora -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="date" class="form-label">Fecha <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="date" formControlName="date"
+                       [class.is-invalid]="(f['date'].invalid || reservationForm.errors?.['pastDateTime']) && (f['date'].dirty || f['date'].touched)">
+                <div class="invalid-feedback">
+                    @if (f['date'].errors?.['required']) { La fecha es obligatoria. }
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="time" class="form-label">Hora <span class="text-danger">*</span></label>
+                <input type="time" class="form-control" id="time" formControlName="time"
+                       [class.is-invalid]="(f['time'].invalid || reservationForm.errors?.['pastDateTime'] || reservationForm.errors?.['outsideHours']) && (f['time'].dirty || f['time'].touched)">
+                 <div class="invalid-feedback">
+                    @if (f['time'].errors?.['required']) { La hora es obligatoria. }
+                </div>
+              </div>
+            </div>
+
+            @if (reservationForm.errors?.['pastDateTime'] && (f['date'].touched || f['time'].touched)) {
+              <div class="alert alert-danger py-2 mt-2">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> La fecha y hora deben ser futuras.
+              </div>
+            }
+
+            @if (reservationForm.errors?.['outsideHours'] && f['time'].touched) {
+              <div class="alert alert-danger py-2 mt-2">
+                <i class="bi bi-clock-fill me-2"></i> El horario de reservaciones es de 1:00 PM a 10:00 PM.
+              </div>
+            }
+
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" [disabled]="reservationForm.invalid">
+                Guardar Reserva
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
