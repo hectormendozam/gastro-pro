@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Base de datos MongoDB para el microservicio de contacto
+  mongo-contacto:
+    image: mongo:latest
+    container_name: gastropro-mongo-contacto
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-contacto-data:/data/db
+    networks:
+      - gastropro-net
+    restart: unless-stopped
+
+  # Microservicio de Contacto
+  ms-contacto:
+    build:
+      context: ./microservices/ms-contacto
+      dockerfile: Dockerfile
+    container_name: gastropro-ms-contacto
+    ports:
+      - "3000:3000"
+    environment:
+      # Configuración de variables de entorno para el contenedor
+      - PORT=3000
+      - MONGO_URI=mongodb://mongo-contacto:27017/gastropro-contacto
+      - FRONTEND_URL=http://localhost:4200
+    depends_on:
+      - mongo-contacto
+    networks:
+      - gastropro-net
+    restart: always
+
+# Red interna para que los contenedores se comuniquen entre sí
+networks:
+  gastropro-net:
+    driver: bridge
+
+# Volumen persistente para evitar perder datos si el contenedor de Mongo se detiene
+volumes:
+  mongo-contacto-data:

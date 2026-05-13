@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ContactService } from '../../core/services/contact.service';
 
 @Component({
   selector: 'app-contact',
@@ -11,9 +12,11 @@ import { CommonModule } from '@angular/common';
 })
 export class Contact {
   private fb = inject(FormBuilder);
+  private contactService = inject(ContactService);
   
   contactForm: FormGroup;
   showSuccess = signal(false);
+  errorMessage = signal<string | null>(null);
 
   constructor() {
     this.contactForm = this.fb.group({
@@ -25,14 +28,28 @@ export class Contact {
 
   onSubmit() {
     if (this.contactForm.valid) {
-      // Here you would normally send the data to a backend
-      console.log('Contact Form Data:', this.contactForm.value);
+      const formData = this.contactForm.value;
       
-      this.showSuccess.set(true);
-      this.contactForm.reset();
+      // Mapeo de campos del formulario (inglés) a los del backend (español)
+      const payload = {
+        nombre: formData.name,
+        correo: formData.email,
+        mensaje: formData.message
+      };
 
-      // Hide alert after 5 seconds
-      setTimeout(() => this.showSuccess.set(false), 5000);
+      this.contactService.sendMessage(payload).subscribe({
+        next: (response) => {
+          console.log('Respuesta del servidor:', response);
+          this.showSuccess.set(true);
+          this.errorMessage.set(null);
+          this.contactForm.reset();
+          setTimeout(() => this.showSuccess.set(false), 5000);
+        },
+        error: (err) => {
+          console.error('Error al enviar mensaje:', err);
+          this.errorMessage.set(err.message || 'Error al conectar con el servidor');
+        }
+      });
     } else {
       this.contactForm.markAllAsTouched();
     }
