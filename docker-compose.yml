@@ -13,6 +13,18 @@ services:
       - gastropro-net
     restart: unless-stopped
 
+  # Base de datos MongoDB para el microservicio de carrito y ordenes
+  mongo-carrito-ordenes:
+    image: mongo:latest
+    container_name: gastropro-mongo-carrito-ordenes
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-carrito-ordenes-data:/data/db
+    networks:
+      - gastropro-net
+    restart: unless-stopped
+
   # Microservicio de Contacto
   ms-contacto:
     build:
@@ -32,6 +44,24 @@ services:
       - gastropro-net
     restart: always
 
+  # Microservicio de Carrito y Ordenes
+  ms-carrito-ordenes:
+    build:
+      context: ./microservices/ms-carrito-ordenes
+      dockerfile: Dockerfile
+    container_name: gastropro-ms-carrito-ordenes
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo-carrito-ordenes:27017/gastropro-carrito
+      - FRONTEND_URL=http://localhost:4200
+    depends_on:
+      - mongo-carrito-ordenes
+    networks:
+      - gastropro-net
+    restart: always
+
 # Red interna para que los contenedores se comuniquen entre sí
 networks:
   gastropro-net:
@@ -40,3 +70,4 @@ networks:
 # Volumen persistente para evitar perder datos si el contenedor de Mongo se detiene
 volumes:
   mongo-contacto-data:
+  mongo-carrito-ordenes-data:

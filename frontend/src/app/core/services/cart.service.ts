@@ -11,6 +11,7 @@ export class CartService {
 
   // Computados
   readonly items = this.cartItems.asReadonly();
+  readonly appliedCoupon = this.couponCode.asReadonly();
   
   readonly subtotal = computed(() =>
     this.cartItems().reduce((acc, item) => acc + item.subtotal, 0)
@@ -70,10 +71,6 @@ export class CartService {
     this.couponCode.set(null);
   }
   
-  getAppliedCoupon() {
-    return this.couponCode;
-  }
-
   clearCart() {
     this.cartItems.set([]);
     this.couponCode.set(null);
