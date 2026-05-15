@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // Important for ngClass and date pipe
+import { CommonModule } from '@angular/common';
 import { ReservationService } from '../../core/services/reservation.service';
 import { Reservation, ReservationZone } from '../../core/interfaces/reservation';
 
 @Component({
   selector: 'app-reservations',
-  standalone: true, // Ensuring standalone
+  standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './reservations.html',
   styleUrl: './reservations.scss',
@@ -18,6 +18,8 @@ export class Reservations {
   reservationForm: FormGroup;
   zones: ReservationZone[] = ['interior', 'terraza', 'barra'];
   showSuccess = signal(false);
+  errorMessage = signal<string | null>(null);
+  isSubmitting = signal(false);
 
   constructor() {
     this.reservationForm = this.fb.group({
@@ -31,7 +33,6 @@ export class Reservations {
     }, { validators: this.dateTimeValidator });
   }
 
-  // Custom validator for future date/time and business hours
   dateTimeValidator(group: AbstractControl): ValidationErrors | null {
     const date = group.get('date')?.value;
     const time = group.get('time')?.value;
@@ -40,18 +41,16 @@ export class Reservations {
 
     const selectedDateTime = new Date(`${date}T${time}`);
     const now = new Date();
-    // Reset seconds and milliseconds to allow reservation in the current minute
     now.setSeconds(0, 0);
 
     if (selectedDateTime < now) {
       return { pastDateTime: true };
     }
 
-    // Validate business hours (12:00 - 22:00)
     const [hours, minutes] = time.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
-    const minMinutes = 13 * 60; // 13:00
-    const maxMinutes = 22 * 60; // 22:00
+    const minMinutes = 13 * 60;
+    const maxMinutes = 22 * 60;
 
     if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
       return { outsideHours: true };
@@ -61,30 +60,40 @@ export class Reservations {
   }
 
   onSubmit() {
-    if (this.reservationForm.valid) {
-      const formValue = this.reservationForm.value;
-      
-      const reservation: Reservation = {
-        fullName: formValue.fullName,
-        email: formValue.email,
-        phone: formValue.phone,
-        peopleCount: formValue.peopleCount,
-        date: formValue.date,
-        time: formValue.time,
-        zone: formValue.zone,
-      };
-
-      this.reservationService.saveReservation(reservation);
-      this.showSuccess.set(true);
-      this.reservationForm.reset({ peopleCount: 2, zone: 'interior' });
-      
-      // Auto-hide alert after 5 seconds
-      setTimeout(() => this.showSuccess.set(false), 5000);
-    } else {
+    if (this.reservationForm.invalid) {
       this.reservationForm.markAllAsTouched();
+      return;
     }
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+
+    const formValue = this.reservationForm.value;
+    const reservation: Reservation = {
+      fullName: formValue.fullName,
+      email: formValue.email,
+      phone: formValue.phone,
+      peopleCount: formValue.peopleCount,
+      date: formValue.date,
+      time: formValue.time,
+      zone: formValue.zone,
+    };
+
+    this.reservationService.saveReservation(reservation).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.showSuccess.set(true);
+        this.reservationForm.reset({ peopleCount: 2, zone: 'interior' });
+        setTimeout(() => this.showSuccess.set(false), 5000);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        const msg = err.error?.message || 'Ocurrió un error al guardar la reservación. Intenta de nuevo.';
+        this.errorMessage.set(msg);
+        setTimeout(() => this.errorMessage.set(null), 6000);
+      },
+    });
   }
 
   get f() { return this.reservationForm.controls; }
 }
-

@@ -15,6 +15,14 @@
             </div>
           }
 
+          @if (errorMessage()) {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="bi bi-exclamation-circle-fill me-2"></i>
+              {{ errorMessage() }}
+              <button type="button" class="btn-close" (click)="errorMessage.set(null)" aria-label="Close"></button>
+            </div>
+          }
+
           <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()" novalidate>
             <!-- Nombre Completo -->
             <div class="mb-3">
@@ -125,8 +133,14 @@
             }
 
             <div class="d-grid mt-4">
-              <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" [disabled]="reservationForm.invalid">
-                Guardar Reserva
+              <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm"
+                      [disabled]="reservationForm.invalid || isSubmitting()">
+                @if (isSubmitting()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Guardando...
+                } @else {
+                  Guardar Reserva
+                }
               </button>
             </div>
           </form>

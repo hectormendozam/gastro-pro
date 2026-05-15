@@ -1,29 +1,26 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Reservation } from '../interfaces/reservation';
+
+interface ApiResponse {
+  success: boolean;
+  message: string;
+  data?: Reservation;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReservationService {
-  private readonly STORAGE_KEY = 'restaurant_reservations';
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:3002/api/reservations';
 
-  constructor() {}
-
-  saveReservation(reservation: Reservation): void {
-    const currentReservations = this.getReservations();
-    // Simulamos un ID único simple
-    const newReservation = {
-      ...reservation,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    
-    currentReservations.push(newReservation);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentReservations));
+  saveReservation(reservation: Reservation): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(this.apiUrl, reservation);
   }
 
-  getReservations(): Reservation[] {
-    const data = localStorage.getItem(this.STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+  getReservations(): Observable<{ success: boolean; count: number; data: Reservation[] }> {
+    return this.http.get<{ success: boolean; count: number; data: Reservation[] }>(this.apiUrl);
   }
 }
