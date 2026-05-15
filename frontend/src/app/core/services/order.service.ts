@@ -1,4 +1,6 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 import { CartItem } from '../interfaces/cart-item';
 import { Order } from '../interfaces/order';
 
@@ -12,33 +14,56 @@ export interface CreateOrderInput {
   providedIn: 'root',
 })
 export class OrderService {
+  // Inyección de dependencias moderna de Angular
+  private http = inject(HttpClient);
+
+  // URL conectada al contenedor expuesto en tu docker-compose
+  private readonly API_URL = 'http://localhost:3001/api/orders';
+
   private readonly STORAGE_KEY = 'gastropro_orders';
   private readonly ordersSignal = signal<Order[]>(this.loadOrders());
 
   readonly orders = this.ordersSignal.asReadonly();
   readonly orderCount = computed(() => this.ordersSignal().length);
 
-  createOrder(input: CreateOrderInput): Order {
-    const normalizedCoupon = input.couponCode?.trim().toUpperCase() || null;
-    const subtotal = this.calculateSubtotal(input.items);
-    const discount = this.calculateDiscount(subtotal, normalizedCoupon);
-    const total = subtotal - discount;
+  /**
+   * Obtiene el historial persistido desde la base de datos a través del microservicio.
+   */
+  fetchOrders(): Observable<{success: boolean, count: number, data: Order[]}> {
+    return this.http.get<{success: boolean, count: number, data: Order[]}>(this.API_URL).pipe(
+      tap((response) => {
+        if (response.success) {
+          this.ordersSignal.set(response.data);
+        }
+      })
+    );
+  }
 
-    const order: Order = {
-      id: crypto.randomUUID(),
-      items: this.cloneItems(input.items),
-      subtotal,
-      discount,
-      total,
+  /**
+   * Mapea el carrito al contrato de datos del backend y delega la creación.
+   */
+  createOrder(input: CreateOrderInput): Observable<{success: boolean, data: Order, message: string}> {
+    const normalizedCoupon = input.couponCode?.trim().toUpperCase() || null;
+    const payload = {
+      items: input.items.map(item => ({
+        dishId: item.dish.id,
+        name: item.dish.name,
+        price: item.dish.price,
+        quantity: item.quantity,
+        subtotal: item.subtotal
+      })),
       pickupTime: input.pickupTime,
-      couponCode: normalizedCoupon,
-      createdAt: new Date().toISOString(),
+      couponCode: normalizedCoupon
     };
 
-    this.ordersSignal.update((orders) => [...orders, order]);
-    this.persistOrders();
-
-    return order;
+    return this.http.post<{success: boolean, data: Order, message: string}>(this.API_URL, payload).pipe(
+      // Usamos tap para interceptar la respuesta exitosa y actualizar la señal reactiva
+      tap((response) => {
+        if (response.success) {
+          this.ordersSignal.update((orders) => [response.data, ...orders]);
+        }
+      })
+    );
   }
 
   validatePickupTime(time: string): string | null {
@@ -62,17 +87,21 @@ export class OrderService {
     return null;
   }
 
-  buildReceipt(order: Order): string {
+  // Se ajusta la interfaz temporalmente a 'any' o puedes modificar tu interface 'Order'
+  // para que coincida con lo que escupe Mongoose (usando orderNumber en lugar de id).
+  buildReceipt(order: any): string {
     let content = `GASTROPRO - ORDEN DE COMPRA\n`;
     content += `=====================================\n`;
-    content += `Orden: ${order.id}\n`;
+    content += `Orden: ${order.orderNumber || order.id}\n`;
     content += `Fecha: ${new Date(order.createdAt).toLocaleDateString()}\n`;
     content += `Hora de recogida: ${order.pickupTime}\n`;
     content += `-------------------------------------\n\n`;
 
     content += `DETALLE:\n`;
-    order.items.forEach((item) => {
-      content += `- ${item.dish.name} (x${item.quantity}) - $${item.subtotal.toFixed(2)}\n`;
+    order.items.forEach((item: any) => {
+      // El backend ahora devuelve { name, quantity, subtotal } plano, sin el anidamiento de 'dish'
+      const itemName = item.name || (item.dish && item.dish.name);
+      content += `- ${itemName} (x${item.quantity}) - $${item.subtotal.toFixed(2)}\n`;
     });
 
     content += `\n-------------------------------------\n`;
@@ -87,12 +116,12 @@ export class OrderService {
     return content;
   }
 
-  downloadReceipt(order: Order): void {
+  downloadReceipt(order: any): void {
     const blob = new Blob([this.buildReceipt(order)], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `orden_${order.id}.txt`;
+    anchor.download = `orden_${order.orderNumber || order.id}.txt`;
     anchor.click();
     window.URL.revokeObjectURL(url);
   }

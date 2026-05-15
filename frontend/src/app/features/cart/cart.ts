@@ -55,16 +55,26 @@ export class Cart {
       return;
     }
 
-    const order = this.orderService.createOrder({
+    this.orderService.createOrder({
       items: this.cartService.items(),
       pickupTime: this.pickupTime(),
       couponCode: this.cartService.appliedCoupon(),
+    }).subscribe({
+      next: (orderResponse: {success: boolean, data: Order, message: string}) => {
+        if (orderResponse.success) {
+          this.orderService.downloadReceipt(orderResponse.data);
+          this.lastOrder.set(orderResponse.data);
+          this.cartService.clearCart();
+          this.pickupTime.set('');
+          this.removeCoupon();
+        } else {
+          alert('Error al crear la orden: ' + orderResponse.message);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error creating order:', error);
+        alert('Error al crear la orden. Por favor, inténtelo de nuevo.');
+      }
     });
-
-    this.orderService.downloadReceipt(order);
-    this.lastOrder.set(order);
-    this.cartService.clearCart();
-    this.pickupTime.set('');
-    this.removeCoupon();
   }
 }
