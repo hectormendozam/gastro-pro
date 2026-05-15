@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Base de datos MongoDB para el microservicio de contacto
   mongo-contacto:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: gastropro-mongo-contacto
     ports:
       - "27017:27017"
@@ -15,7 +15,7 @@ services:
 
   # Base de datos MongoDB para el microservicio de carrito y ordenes
   mongo-carrito-ordenes:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: gastropro-mongo-carrito-ordenes
     ports:
       - "27018:27017"
@@ -64,7 +64,7 @@ services:
 
   # Base de datos MongoDB para el microservicio de reservaciones
   mongo-reservas:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: gastropro-mongo-reservas
     ports:
       - "27019:27017"
