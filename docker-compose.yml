@@ -62,6 +62,36 @@ services:
       - gastropro-net
     restart: always
 
+  # Base de datos MongoDB para el microservicio de reservaciones
+  mongo-reservas:
+    image: mongo:latest
+    container_name: gastropro-mongo-reservas
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo-reservas-data:/data/db
+    networks:
+      - gastropro-net
+    restart: unless-stopped
+
+  # Microservicio de Reservaciones
+  ms-reservas:
+    build:
+      context: ./microservices/ms-reservas
+      dockerfile: Dockerfile
+    container_name: gastropro-ms-reservas
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGO_URI=mongodb://mongo-reservas:27017/gastropro-reservas
+      - FRONTEND_URL=http://localhost:4200
+    depends_on:
+      - mongo-reservas
+    networks:
+      - gastropro-net
+    restart: always
+
 # Red interna para que los contenedores se comuniquen entre sí
 networks:
   gastropro-net:
@@ -71,3 +101,4 @@ networks:
 volumes:
   mongo-contacto-data:
   mongo-carrito-ordenes-data:
+  mongo-reservas-data:
