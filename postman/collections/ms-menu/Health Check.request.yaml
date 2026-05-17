@@ -1,0 +1,16 @@
+$kind: http-request
+method: GET
+url: '{{base_url_menu}}/api/health'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response json.status is 'ok'", function () {
+        const json = pm.response.json();
+        pm.expect(json.status).to.eql('ok');
+      });

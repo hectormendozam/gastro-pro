@@ -1,0 +1,21 @@
+$kind: http-request
+method: GET
+url: '{{base_url_menu}}/api/menu/categoria/postres'
+order: 6000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response success is true", function () {
+        const json = pm.response.json();
+        pm.expect(json.success).to.be.true;
+      });
+
+      pm.test("Response data is an array", function () {
+        const json = pm.response.json();
+        pm.expect(json.data).to.be.an('array');
+      });

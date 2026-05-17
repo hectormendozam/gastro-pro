@@ -1,0 +1,22 @@
+$kind: http-request
+method: POST
+url: '{{base_url_carrito}}/api/orders'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "items": [{ "dishId": 1, "name": "Tacos al Pastor", "price": 85, "quantity": 2, "subtotal": 170 }],
+      "pickupTime": "14:00"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is 201', () => { pm.response.to.have.status(201); });
+      pm.test('Order created successfully', () => { const json = pm.response.json(); pm.expect(json.success).to.be.true; pm.expect(json.data).to.have.property('orderNumber'); pm.expect(json.data.total).to.eql(170); });
+      const json = pm.response.json();
+      if (json.data && json.data.id) { pm.collectionVariables.set('orderId', json.data.id); }

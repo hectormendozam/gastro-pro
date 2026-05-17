@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: '{{base_url_reservas}}/api/reservations'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Success is true', () => { const json = pm.response.json(); pm.expect(json.success).to.eql(true); });
+      pm.test('Data is array', () => { const json = pm.response.json(); pm.expect(json.data).to.be.an('array'); });
+      pm.test('Has count property', () => { const json = pm.response.json(); pm.expect(json).to.have.property('count'); });

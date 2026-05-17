@@ -1,0 +1,31 @@
+$kind: http-request
+method: GET
+url: '{{base_url_menu}}/api/menu'
+order: 5000
+queryParams:
+  - key: categoria
+    value: bebidas
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response success is true", function () {
+        const json = pm.response.json();
+        pm.expect(json.success).to.be.true;
+      });
+
+      pm.test("Response data is an array", function () {
+        const json = pm.response.json();
+        pm.expect(json.data).to.be.an('array');
+      });
+
+      pm.test("Every item has categoria === 'bebidas'", function () {
+        const json = pm.response.json();
+        json.data.forEach(function (item) {
+          pm.expect(item.categoria).to.eql('bebidas');
+        });
+      });

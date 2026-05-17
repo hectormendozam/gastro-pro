@@ -1,0 +1,9 @@
+$kind: http-request
+method: GET
+url: '{{base_url_reservas}}/api/health'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Service is online', () => { const json = pm.response.json(); pm.expect(json.status).to.eql('ok'); });

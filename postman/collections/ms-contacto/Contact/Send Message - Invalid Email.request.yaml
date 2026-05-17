@@ -1,0 +1,27 @@
+$kind: http-request
+method: POST
+url: '{{base_url_contacto}}/api/contact'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "María García",
+      "correo": "not-an-email",
+      "mensaje": "Hola, tengo una pregunta."
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Response success is false", function () {
+        const json = pm.response.json();
+        pm.expect(json.success).to.be.false;
+      });

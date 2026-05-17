@@ -1,0 +1,21 @@
+$kind: http-request
+method: POST
+url: '{{base_url_carrito}}/api/orders'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "items": [{ "dishId": 1, "name": "Tacos al Pastor", "price": 100, "quantity": 2, "subtotal": 200 }],
+      "pickupTime": "15:00",
+      "couponCode": "DESCUENTO10"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is 201', () => { pm.response.to.have.status(201); });
+      pm.test('Discount applied correctly', () => { const json = pm.response.json(); pm.expect(json.success).to.be.true; pm.expect(json.data.discount).to.eql(20); pm.expect(json.data.total).to.eql(180); });

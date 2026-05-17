@@ -1,0 +1,44 @@
+$kind: http-request
+method: POST
+url: '{{base_url_menu}}/api/menu'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nombre": "Tacos al Pastor",
+      "descripcion": "Deliciosos tacos con carne de cerdo marinada",
+      "precio": 85,
+      "imagen": "https://example.com/tacos.jpg",
+      "categoria": "platos fuertes"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 201", function () {
+        pm.response.to.have.status(201);
+      });
+
+      pm.test("Response success is true", function () {
+        const json = pm.response.json();
+        pm.expect(json.success).to.be.true;
+      });
+
+      pm.test("Response data has _id or id", function () {
+        const json = pm.response.json();
+        const data = json.data;
+        pm.expect(data).to.satisfy(function (d) {
+          return d._id !== undefined || d.id !== undefined;
+        });
+      });
+
+      pm.test("Save dishId to collectionVariables", function () {
+        const json = pm.response.json();
+        const data = json.data;
+        const dishId = data._id || data.id;
+        pm.collectionVariables.set("dishId", dishId);
+      });

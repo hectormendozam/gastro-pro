@@ -1,0 +1,10 @@
+$kind: http-request
+method: GET
+url: '{{base_url_carrito}}/api/orders/000000000000000000000000'
+order: 7000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is 404', () => { pm.response.to.have.status(404); });
+      pm.test('Not found message', () => { const json = pm.response.json(); pm.expect(json.success).to.be.false; });

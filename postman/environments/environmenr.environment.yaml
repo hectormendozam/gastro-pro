@@ -1,0 +1,4 @@
+name: environmenr
+values:
+  - key: base_url_menu
+    value: 'http://localhost:3003'
