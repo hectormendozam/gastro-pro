@@ -24,7 +24,7 @@ const normalizeItems = (items = []) =>
     const subtotal = item.subtotal ?? Number(price) * Number(quantity);
 
     return {
-      dishId: Number(dishId),
+      dishId: String(dishId),
       name,
       price: Number(price),
       quantity: Number(quantity),

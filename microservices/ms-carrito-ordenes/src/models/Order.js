@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const orderItemSchema = new mongoose.Schema(
   {
     dishId: {
-      type: Number,
+      type: String,
       required: [true, 'El identificador del platillo es obligatorio'],
     },
     name: {
