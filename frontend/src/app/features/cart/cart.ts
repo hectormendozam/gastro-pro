@@ -22,7 +22,7 @@ export class Cart {
   pickupTimeError = signal<string | null>(null);
   lastOrder = signal<Order | null>(null);
 
-  updateQuantity(dishId: number, quantity: number) {
+  updateQuantity(dishId: number | string, quantity: number) {
     this.cartService.updateQuantity(dishId, quantity);
   }
 

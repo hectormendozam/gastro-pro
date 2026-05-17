@@ -44,11 +44,11 @@ export class CartService {
     });
   }
 
-  removeFromCart(dishId: number) {
+  removeFromCart(dishId: number | string) {
     this.cartItems.update((items) => items.filter((item) => item.dish.id !== dishId));
   }
 
-  updateQuantity(dishId: number, quantity: number) {
+  updateQuantity(dishId: number | string, quantity: number) {
     if (quantity <= 0) {
       this.removeFromCart(dishId);
       return;
