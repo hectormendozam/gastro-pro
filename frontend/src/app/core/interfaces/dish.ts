@@ -1,7 +1,7 @@
 export type DishCategory = 'Entradas' | 'Platos Fuertes' | 'Postres' | 'Bebidas';
 
 export interface Dish {
-  id: number;
+  id: number | string;
   name: string;
   description: string;
   price: number;
