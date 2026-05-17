@@ -1,2 +1,4 @@
 $kind: collection
 name: ms-carrito-ordenes
+variables:
+  orderId: ""

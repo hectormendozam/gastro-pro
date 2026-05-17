@@ -1,0 +1,27 @@
+$kind: http-request
+name: Get All Messages
+url: "{{base_url_contacto}}/api/contact"
+method: GET
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Response success is false", function () {
+        const json = pm.response.json();
+        pm.expect(json.success).to.be.false;
+      });
+
+      pm.test("Message includes 'obligatorios'", function () {
+        const json = pm.response.json();
+        pm.expect(json.message).to.include('obligatorios');
+      });
+    language: text/javascript
+order: 3736081596940969

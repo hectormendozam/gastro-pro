@@ -72,6 +72,25 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// Endpoint GET para obtener todos los mensajes de contacto
+app.get('/api/contact', async (req, res) => {
+  try {
+    // Buscar todos los contactos, ordenados del más reciente al más antiguo
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      count: contacts.length,
+      data: contacts
+    });
+  } catch (error) {
+    console.error('Error al obtener los contactos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Ocurrió un error al obtener los mensajes.'
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
