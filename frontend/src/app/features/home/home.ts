@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common'; // Import CommonModule for general functionalities if needed, and CurrencyPipe
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common'; 
 import { MenuService } from '../../core/services/menu.service';
 import { CartService } from '../../core/services/cart.service';
 import { Dish, DishCategory } from '../../core/interfaces/dish';
@@ -7,16 +7,23 @@ import { Dish, DishCategory } from '../../core/interfaces/dish';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CurrencyPipe, CommonModule], // Ensure CommonModule is imported for @for
+  imports: [CurrencyPipe, CommonModule], 
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
-export class Home {
+export class Home implements OnInit { // Agregamos implements OnInit
   private menuService = inject(MenuService);
-  cartService = inject(CartService); // Made public for potential template usage if needed
+  cartService = inject(CartService); 
 
   categories: DishCategory[] = ['Entradas', 'Platos Fuertes', 'Postres', 'Bebidas'];
   selectedCategory = signal<DishCategory | 'Todos'>('Todos');
+
+  // Esta función se ejecuta automáticamente al abrir la pantalla
+  ngOnInit() {
+    this.menuService.fetchDishes().subscribe({
+      error: (err) => console.error('Error cargando el menú', err)
+    });
+  }
 
   filteredDishes = computed(() => {
     const category = this.selectedCategory();
@@ -34,4 +41,3 @@ export class Home {
     this.cartService.addToCart(dish);
   }
 }
-
